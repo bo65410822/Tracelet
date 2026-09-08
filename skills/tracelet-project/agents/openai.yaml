@@ -1,0 +1,6 @@
+interface:
+  display_name: "Tracelet Project"
+  short_description: "Tracelet workflow with clear, evidence-based decisions"
+  default_prompt: "Use $tracelet-project to analyze or implement this Tracelet change as a senior Android architect; modify code only when explicitly authorized."
+policy:
+  allow_implicit_invocation: true
