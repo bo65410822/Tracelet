@@ -38,6 +38,11 @@ set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 
+@rem Android Gradle Plugin 8.x requires Java 11 or newer. Prefer the JBR
+@rem bundled with Android Studio when JAVA_HOME has not been configured.
+if exist "%ProgramFiles%\Android\Android Studio\jbr\bin\java.exe" set JAVA_HOME=%ProgramFiles%\Android\Android Studio\jbr
+if defined JAVA_HOME goto findJavaFromJavaHome
+
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if "%ERRORLEVEL%" == "0" goto execute

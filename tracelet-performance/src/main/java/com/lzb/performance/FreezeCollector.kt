@@ -3,18 +3,28 @@ package com.lzb.performance
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
+import android.util.Log
 import android.util.Printer
 import com.lzb.core.Collector
 import com.lzb.core.TraceletContext
 import com.lzb.core.TraceletEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * 检测主线程卡顿 性能数据收集器
  */
-class FreezeCollector : Collector {
+class FreezeCollector : Collector, DiagnosticMessageAware {
 
     companion object {
-        const val TYPE = "freeze"
+        private const val TAG = "FreezeCollector"
+
+        val TYPE = DiagnosticType.FREEZE
         const val START_MSG = ">>>>> Dispatching"
         const val END_MSG = "<<<<< Finished"
         const val LINE = 100
@@ -35,7 +45,24 @@ class FreezeCollector : Collector {
     @Volatile
     private var mWatchdogTask: Runnable? = null
 
+    @Volatile
+    private var mDiagnosticListener: DiagnosticMessageAware.InnerMessageListener? = null
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private var mScope: CoroutineScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
+
     private val mPrinter: Printer = Printer { message ->
+        mScope.launch {
+            try {
+                mDiagnosticListener?.onMessage(TYPE, message)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                Log.e(TAG, "diagnostic callback failed", e)
+            }
+        }
+
         val duration: Long
         when {
             message.startsWith(START_MSG) -> {
@@ -47,6 +74,7 @@ class FreezeCollector : Collector {
 
             message.startsWith(END_MSG) -> {
                 if (mDurationStart == 0L) {
+                    Log.i(TAG, "mDurationStart: $mDurationStart")
                     return@Printer
                 }
                 duration = (System.nanoTime() - mDurationStart) / 1_000_000L
@@ -60,7 +88,7 @@ class FreezeCollector : Collector {
                         "thresholdMs" to thresholdMs.toString()
                     )
                     val event = TraceletEvent(
-                        type = TYPE,
+                        type = TYPE.toString(),
                         attributes = attributes,
                         samples = mSamples
                     )
@@ -94,6 +122,8 @@ class FreezeCollector : Collector {
         mWatchdogThread?.quitSafely()
         mWatchdogThread = null
         mWatchdogHandler = null
+        mDiagnosticListener = null
+        mScope.coroutineContext.cancelChildren()
     }
 
     private fun scheduleSample() {
@@ -111,5 +141,9 @@ class FreezeCollector : Collector {
         val task = mWatchdogTask ?: return
         mWatchdogHandler?.removeCallbacks(task)
         mWatchdogTask = null
+    }
+
+    override fun setDiagnosticMessage(listener: DiagnosticMessageAware.InnerMessageListener?) {
+        mDiagnosticListener = listener
     }
 }

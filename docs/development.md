@@ -51,3 +51,36 @@ SDK 模块不是 `app` 的一部分；`app` 不再直接依赖 `performance`/`re
 - SDK 内部异常不得传播到宿主应用。
 - 新增行为必须有对应测试或可复现验收步骤。
 - 与现有设计不一致时，先记录决策，再修改实现。
+
+## Collaboration Roles
+
+This project is developed by one primary developer with architectural assistance from the AI.
+
+### Developer responsibilities
+
+- Confirm requirements and acceptance criteria.
+- Choose the final technical approach.
+- Implement SDK code and tests.
+- Run validation and make the final merge or release decision.
+
+### Architect and review assistant responsibilities
+
+- Analyze requirements, constraints, and affected modules.
+- Propose implementation options and explain their trade-offs.
+- Review developer-written code for correctness, concurrency, Android lifecycle behavior, performance, maintainability, API compatibility, and test coverage.
+- Help diagnose build, test, and design problems.
+- Ask questions that improve the developer's engineering judgment.
+
+## Development Workflow
+
+1. Confirm the requirement and acceptance criteria.
+2. Inspect the current architecture and identify the impact scope.
+3. Evaluate implementation options and design trade-offs.
+4. The developer implements the selected approach.
+5. Submit the changes for architectural and code review.
+6. Address review findings and add or update tests.
+7. Run the relevant Gradle checks and record any environment-related limitations.
+
+## AI Modification Boundary
+
+The AI provides analysis, design guidance, and review by default. It must not modify project files unless the developer explicitly requests implementation, modification, or repair. A review request alone is not permission to edit code.

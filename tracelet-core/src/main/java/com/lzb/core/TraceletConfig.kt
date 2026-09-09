@@ -9,4 +9,8 @@ package com.lzb.core
 data class TraceletConfig(
     val thresholdMs: Long = 700L,
     val storagePolicy: StoragePolicy = StoragePolicy()
-)
+) {
+    init {
+        require(thresholdMs > 0)
+    }
+}

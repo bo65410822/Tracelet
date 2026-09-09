@@ -7,6 +7,8 @@ import com.lzb.core.TraceletEvent
 import java.io.File
 import java.util.UUID
 import android.os.Process
+import android.util.Printer
+import com.lzb.performance.DiagnosticType
 
 object Tracelet {
 
@@ -49,6 +51,13 @@ object Tracelet {
     suspend fun exportEventsTo(destinationDirectory: File): File {
         checkInit()
         return mManager.exportEventsTo(destinationDirectory)
+    }
+
+    fun setMainLooperPrinter(printer: Printer?) {
+        checkInit()
+        mManager.register(DiagnosticType.FREEZE, {
+            printer?.println(it)
+        })
     }
 
     /**
