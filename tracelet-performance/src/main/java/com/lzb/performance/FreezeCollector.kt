@@ -118,7 +118,7 @@ class FreezeCollector : Collector {
         mDurationStart = 0L
         mDispatching = false
         mSamples = emptyList()
-        Looper.getMainLooper().setMessageLogging(null)
+        Looper.getMainLooper().setMessageLogging(mainThreadPrinter)
         mWatchdogThread?.quitSafely()
         mWatchdogThread = null
         mWatchdogHandler = null
