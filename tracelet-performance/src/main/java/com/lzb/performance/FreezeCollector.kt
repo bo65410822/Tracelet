@@ -19,15 +19,16 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * 检测主线程卡顿 性能数据收集器
  */
-class FreezeCollector : Collector, DiagnosticMessageAware {
+class FreezeCollector : Collector {
 
     companion object {
         private const val TAG = "FreezeCollector"
-
-        val TYPE = DiagnosticType.FREEZE
+        const val TYPE = "freeze"
         const val START_MSG = ">>>>> Dispatching"
         const val END_MSG = "<<<<< Finished"
         const val LINE = 100
+
+        var mainThreadPrinter: Printer? = null
     }
 
     private var mListener: Collector.EventListener? = null
@@ -45,8 +46,6 @@ class FreezeCollector : Collector, DiagnosticMessageAware {
     @Volatile
     private var mWatchdogTask: Runnable? = null
 
-    @Volatile
-    private var mDiagnosticListener: DiagnosticMessageAware.InnerMessageListener? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private var mScope: CoroutineScope =
@@ -55,7 +54,7 @@ class FreezeCollector : Collector, DiagnosticMessageAware {
     private val mPrinter: Printer = Printer { message ->
         mScope.launch {
             try {
-                mDiagnosticListener?.onMessage(TYPE, message)
+                mainThreadPrinter?.println(message)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
@@ -111,6 +110,7 @@ class FreezeCollector : Collector, DiagnosticMessageAware {
         Looper.getMainLooper().setMessageLogging(mPrinter)
     }
 
+
     override fun stop() {
         if (mWatchdogThread == null) return
         cancelSample()
@@ -122,7 +122,6 @@ class FreezeCollector : Collector, DiagnosticMessageAware {
         mWatchdogThread?.quitSafely()
         mWatchdogThread = null
         mWatchdogHandler = null
-        mDiagnosticListener = null
         mScope.coroutineContext.cancelChildren()
     }
 
@@ -141,9 +140,5 @@ class FreezeCollector : Collector, DiagnosticMessageAware {
         val task = mWatchdogTask ?: return
         mWatchdogHandler?.removeCallbacks(task)
         mWatchdogTask = null
-    }
-
-    override fun setDiagnosticMessage(listener: DiagnosticMessageAware.InnerMessageListener?) {
-        mDiagnosticListener = listener
     }
 }

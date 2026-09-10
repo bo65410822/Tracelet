@@ -7,9 +7,6 @@ import com.lzb.core.Collector
 import com.lzb.core.EventStore
 import com.lzb.core.TraceletContext
 import com.lzb.core.TraceletEvent
-import com.lzb.performance.DiagnosticMessageAware
-import com.lzb.performance.DiagnosticMessageAware.InnerMessageListener
-import com.lzb.performance.DiagnosticType
 import com.lzb.report.JsonEventStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,8 +44,6 @@ internal class CollectorManager(
     private lateinit var mApplicationContext: Context
 
     private var mActivityPageTracker: ActivityPageTracker? = null
-
-    private val mDispatcher = DiagnosticMessageDispatcher()
 
     fun initialize() {
         mApplicationContext = context.applicationContext
@@ -96,22 +91,10 @@ internal class CollectorManager(
      * 启动采集
      */
     fun start() {
-        val listener = InnerMessageListener { type, msg ->
-            mDispatcher.dispatch(type, msg)
-        }
         collectors.forEach {
-            if (it is DiagnosticMessageAware) {
-                it.setDiagnosticMessage(listener)
-            }
             it.start(this)
         }
     }
-
-    fun register(type: DiagnosticType, listener: ((String?) -> Unit)?) =
-        mDispatcher.register(type, listener)
-
-    fun unregister(type: DiagnosticType) = mDispatcher.unregister(type)
-
 
     /**
      * 停止采集

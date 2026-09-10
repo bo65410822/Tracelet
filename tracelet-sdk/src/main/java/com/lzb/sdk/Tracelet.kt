@@ -8,7 +8,7 @@ import java.io.File
 import java.util.UUID
 import android.os.Process
 import android.util.Printer
-import com.lzb.performance.DiagnosticType
+import com.lzb.performance.FreezeCollector
 
 object Tracelet {
 
@@ -53,13 +53,6 @@ object Tracelet {
         return mManager.exportEventsTo(destinationDirectory)
     }
 
-    fun setMainLooperPrinter(printer: Printer?) {
-        checkInit()
-        mManager.register(DiagnosticType.FREEZE, {
-            printer?.println(it)
-        })
-    }
-
     /**
      * 清空本地已持久化的事件与残留临时文件。
      *
@@ -68,6 +61,12 @@ object Tracelet {
     fun clearLocalEvents(onComplete: (Throwable?) -> Unit = {}) {
         checkInit()
         mManager.clearEvents(onComplete)
+    }
+
+
+    fun setMainPrinter(printer: Printer?) {
+        checkInit()
+        FreezeCollector.mainThreadPrinter = printer
     }
 
     /**
