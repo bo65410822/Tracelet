@@ -12,7 +12,7 @@ MVP 早期先保持单 Gradle 模块以验证闭环；稳定后按固定顺序�
 2. 已拆分 `tracelet-report` 与 `tracelet-performance`：实现层，只依赖 `core`。
 3. 已建立 `tracelet-sdk`：对外 API + 默认组装，宿主只需依赖它。
 
-`compose` 作为可选模块继续保留，直到出现实际 Compose 适配 API 后再建立。依赖方向固定为 `core → report/performance → tracelet-sdk → app`，禁止反向依赖。
+`compose` 作为可选模块继续保留，直到出现实际 Compose 适配 API 后再建立。诊断能力的依赖方向固定为 `core → report/performance → tracelet-sdk → app`，禁止反向依赖；`tracelet-ble` 作为独立垂直业务模块，不依赖诊断实现模块，宿主按需选择 `tracelet-sdk` 或 `tracelet-ble`。
 
 ## 原因
 

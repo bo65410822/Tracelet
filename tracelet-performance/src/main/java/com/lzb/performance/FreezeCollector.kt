@@ -19,7 +19,14 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * 检测主线程卡顿 性能数据收集器
  */
-class FreezeCollector : Collector {
+class FreezeCollector(
+    private val nanoTime: () -> Long = System::nanoTime,
+    private val stackSampler: () -> List<String> = {
+        Looper.getMainLooper().thread.stackTrace
+            .take(LINE)
+            .map { it.toString() }
+    }
+) : Collector {
 
     companion object {
         private const val TAG = "FreezeCollector"
@@ -61,11 +68,13 @@ class FreezeCollector : Collector {
                 Log.e(TAG, "diagnostic callback failed", e)
             }
         }
+        onLooperMessage(message)?.let { mListener?.onEvent(it) }
+    }
 
-        val duration: Long
+    internal fun onLooperMessage(message: String): TraceletEvent? {
         when {
             message.startsWith(START_MSG) -> {
-                mDurationStart = System.nanoTime()
+                mDurationStart = nanoTime()
                 mDispatching = true
                 mSamples = emptyList()
                 scheduleSample()
@@ -74,31 +83,39 @@ class FreezeCollector : Collector {
             message.startsWith(END_MSG) -> {
                 if (mDurationStart == 0L) {
                     Log.i(TAG, "mDurationStart: $mDurationStart")
-                    return@Printer
+                    return null
                 }
-                duration = (System.nanoTime() - mDurationStart) / 1_000_000L
+                val duration = (nanoTime() - mDurationStart) / 1_000_000L
                 cancelSample()
 
                 val thresholdMs = TraceletContext.config.thresholdMs
-                if (duration >= thresholdMs) {
-                    // 超过阈值，记录卡顿
-                    val attributes = mapOf(
-                        "durationMs" to duration.toString(),
-                        "thresholdMs" to thresholdMs.toString()
-                    )
-                    val event = TraceletEvent(
-                        type = TYPE.toString(),
-                        attributes = attributes,
+                val event = if (duration >= thresholdMs) {
+                    TraceletEvent(
+                        type = TYPE,
+                        attributes = mapOf(
+                            "durationMs" to duration.toString(),
+                            "thresholdMs" to thresholdMs.toString()
+                        ),
                         samples = mSamples
                     )
-                    mListener?.onEvent(event)
+                } else {
+                    null
                 }
                 mDurationStart = 0L
                 mDispatching = false
                 mSamples = emptyList()
+                return event
             }
         }
+        return null
     }
+
+    internal fun sampleNow() {
+        if (mDispatching && mDurationStart != 0L) {
+            mSamples = stackSampler().take(LINE)
+        }
+    }
+
 
     override fun start(listener: Collector.EventListener) {
         if (mWatchdogThread != null) return
