@@ -5,23 +5,13 @@ import com.lzb.ble.scan.BleScannerImpl
 import com.lzb.ble.scan.BluetoothScanner
 import com.lzb.ble.scan.ScanListener
 
-class BleManager {
-    companion object {
-
-        private var instance: BleManager? = null
-        fun getInstance(): BleManager {
-            if (instance == null) {
-                instance = BleManager()
-            }
-            return instance!!
-        }
-    }
+object BleManager {
 
     private var scanner: BluetoothScanner? = null
 
     fun startScan(context: Context, listener: ScanListener) {
         if (scanner == null) {
-            scanner = BleScannerImpl(context)
+            scanner = BleScannerImpl(context.applicationContext)
         }
         scanner?.startScan(listener)
     }

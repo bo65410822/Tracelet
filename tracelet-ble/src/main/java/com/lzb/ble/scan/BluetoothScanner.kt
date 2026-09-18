@@ -23,6 +23,11 @@ sealed interface ScanState {
     data object Scanning : ScanState
 
     /**
+     * 已经开始扫描了
+     */
+    data object AlreadyScanning : ScanState
+
+    /**
      * 扫描到设备
      */
     data class DeviceFound(val result: ScanResult?) : ScanState
@@ -56,4 +61,7 @@ sealed interface ScanState {
      * 扫描失败
      */
     data class Failed(val code: Int?) : ScanState
+
+    data class Unknown(val message: String?) : ScanState
+
 }
