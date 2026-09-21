@@ -1,15 +1,6 @@
 package com.lzb.ble.scan
 
-import android.bluetooth.le.ScanResult
-
-
-internal interface BluetoothScanner {
-
-    fun startScan(listener: ScanListener)
-
-    fun stopScan()
-
-}
+import com.lzb.ble.data.BluetoothDeviceInfo
 
 interface ScanListener {
     fun onStateChanged(state: ScanState)
@@ -30,7 +21,7 @@ sealed interface ScanState {
     /**
      * 扫描到设备
      */
-    data class DeviceFound(val result: ScanResult?) : ScanState
+    data class DeviceFound(val result: BluetoothDeviceInfo?) : ScanState
 
     /**
      * 蓝牙未启用
@@ -58,10 +49,30 @@ sealed interface ScanState {
     data object Stopped : ScanState
 
     /**
-     * 扫描失败
+     * 单个扫描失败
      */
-    data class Failed(val code: Int?) : ScanState
+    data class DriverFailed(val transport: BluetoothTransport) : ScanState
+
+    /**
+     * 最终扫描失败
+     */
+    data class Failed(
+        val transport: BluetoothTransport,
+        val error: Throwable?
+    ) : ScanState
 
     data class Unknown(val message: String?) : ScanState
+}
 
+
+enum class BluetoothTransport {
+    LE,
+    CLASSIC,
+    ALL,
+}
+
+enum class ScanMode {
+    BLE_ONLY,
+    CLASSIC_ONLY,
+    BOTH
 }

@@ -22,3 +22,9 @@ The AI may modify files only when the user explicitly asks it to implement, chan
 - Respect the existing module boundaries and dependency direction.
 - Distinguish implemented behavior from planned behavior.
 - When changes are authorized, verify them with appropriate tests or builds and report any gaps.
+
+## Code Review Workflow
+
+- Code review requests are read-only by default: inspect the requested scope and report findings without modifying source code.
+- After a review, record the findings and end the review. Do not ask the user to choose between fixing all issues, fixing selected issues, or only recording them.
+- Only enter a fix workflow when the user explicitly asks to fix or implement changes.

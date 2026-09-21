@@ -1,19 +1,21 @@
 package com.lzb.ble
 
+import android.annotation.SuppressLint
 import android.content.Context
-import com.lzb.ble.scan.BleScannerImpl
-import com.lzb.ble.scan.BluetoothScanner
+import com.lzb.ble.scan.BluetoothScanCoordinator
 import com.lzb.ble.scan.ScanListener
+import com.lzb.ble.scan.ScanMode
 
 object BleManager {
 
-    private var scanner: BluetoothScanner? = null
+    @SuppressLint("StaticFieldLeak")
+    private var scanner: BluetoothScanCoordinator? = null
 
-    fun startScan(context: Context, listener: ScanListener) {
+    fun startScan(context: Context, mode: ScanMode = ScanMode.BLE_ONLY, listener: ScanListener) {
         if (scanner == null) {
-            scanner = BleScannerImpl(context.applicationContext)
+            scanner = BluetoothScanCoordinator(context.applicationContext)
         }
-        scanner?.startScan(listener)
+        scanner?.startScan(mode, listener)
     }
 
     fun stopScan() {
