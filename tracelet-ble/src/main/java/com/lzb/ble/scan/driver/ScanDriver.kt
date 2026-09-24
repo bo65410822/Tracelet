@@ -1,6 +1,6 @@
 package com.lzb.ble.scan.driver
 
-import com.lzb.ble.scan.BluetoothDeviceInfo
+import com.lzb.ble.data.BluetoothDeviceInfo
 import com.lzb.ble.scan.BluetoothTransport
 
 internal interface ScanDriver {
