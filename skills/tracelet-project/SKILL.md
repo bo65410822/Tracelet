@@ -125,6 +125,17 @@ During code review:
 
 Use the clearest response shape for the problem rather than a mandatory template. A simple question may need only a direct conclusion and reason; a race may need a timeline; a stateful component may need invariants; a module decision may need dependency and ownership boundaries.
 
+### Review output format
+
+For a review that surfaces multiple findings, present them as a severity-ordered list (高 → 中 → 低). For each finding:
+
+- a one-line heading with a `[高|中|低]` tag that names the problem;
+- the offending code inlined in a fenced block (```` ```kotlin ````), trimmed to the lines that matter, with an inline `// ←` marker on the exact defect line when it aids reading;
+- a short analysis under the snippet: the mechanism (why it breaks, reconstructing timing/state when relevant) and the observable impact, backed by `file:line`;
+- a concrete solution for every finding — the specific change to make, with a corrected code sketch when it clarifies the fix. Do not stop at a vague direction like "should add a guard"; show what the guard is. When several findings share one root cause, state the unifying fix once and reference it.
+
+The solution is a proposal only: never apply it unless the user explicitly asks (per AGENTS.md authorization gate). Keep prose tight and do not restate the snippet in words. Do not append a "which ones should I fix" prompt — recording findings plus solutions ends the review. This code-inline shape is the default for multi-finding reviews; a single conceptual question still uses the clearest shape described above.
+
 ## Scenario-derived validation
 
 Do not hard-code tests for one business domain into this skill. Derive validation from the current component’s invariants, external dependencies, and lifecycle. Consider the categories that apply:

@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/tracelet-ble" />
             <option value="$PROJECT_DIR$/tracelet-core" />
+            <option value="$PROJECT_DIR$/tracelet-lc" />
             <option value="$PROJECT_DIR$/tracelet-performance" />
             <option value="$PROJECT_DIR$/tracelet-report" />
             <option value="$PROJECT_DIR$/tracelet-sdk" />

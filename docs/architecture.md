@@ -37,7 +37,11 @@ core  performance report
 
 ### `tracelet-ble`
 
-独立的统一蓝牙设备业务 SDK。它对业务层提供统一的设备发现、身份确认、连接、双向通信和恢复能力，底层通过传输适配器支持 BLE GATT、Classic RFCOMM/SPP 以及音频 Profile 状态观察。上层统一设备语义，下层保留不同协议的真实差异；A2DP/HFP 不被当作任意业务数据通道。它可以依赖 Android 蓝牙 API 和通用基础库，但不得让 `tracelet-core`、`tracelet-performance` 或 `tracelet-report` 依赖蓝牙实现。蓝牙业务事件、协议和状态模型以本模块为边界；需要统一诊断时通过明确接口接入，不直接耦合性能采集链路。
+独立的统一蓝牙设备业务 SDK。它对业务层提供统一的设备发现、身份确认、连接、双向通信和恢复能力，底层通过传输适配器支持 BLE GATT、Classic RFCOMM/SPP 以及音频 Profile 状态观察。上层统一设备语义，下层保留不同协议的真实差异；A2DP/HFP 不被当作任意业务数据通道。它可以依赖 Android 蓝牙 API 和通用基础库，但不得让 `tracelet-core`、`tracelet-performance` 或 `tracelet-report` 依赖蓝牙实现。蓝牙业务事件、协议和状态模型以本模块为边界；需要统一诊断时通过明确接口接入，不直接耦合性能采集链路。连接与 GATT 操作的实现设计见 `ble-connection-design.md`。
+
+### `tracelet-lc`
+
+独立的通用长连接模块，基于原始 TCP 自研分帧编解码、连接管理、心跳、断线重连与可靠传输能力。它与诊断链路、蓝牙模块相互独立，不改变其它模块的依赖方向；传输安全（TLS）作为独立层后续补齐。设计与协议见 `lc-design.md` 与 `lc-frame-protocol.md`。
 
 ### `tracelet-compose`
 
