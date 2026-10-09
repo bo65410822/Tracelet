@@ -1,6 +1,6 @@
 package com.lzb.lc.frame
 
-enum class LcFrameType(val code: Byte) {
+internal enum class LcFrameType(val code: Byte) {
     HANDSHAKE(0x01),
     HEARTBEAT(0x02),
     HEARTBEAT_ACK(0x03),

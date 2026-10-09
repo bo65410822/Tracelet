@@ -116,7 +116,7 @@ internal class FrameDecoder(private val maxPayloadBytes: Int) {
                 ((b[p + 2].toInt() and 0xFF) shl 8) or (b[p + 3].toInt() and 0xFF)
 }
 
-sealed interface DecodeOutcome {
+internal sealed interface DecodeOutcome {
     data class Frames(val frames: List<ParsedFrame>) : DecodeOutcome
     data class Corrupt(val frames: List<ParsedFrame>) : DecodeOutcome
 }

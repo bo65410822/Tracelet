@@ -15,13 +15,13 @@ internal object FrameProtocol {
     }
 }
 
-sealed interface ParseResult {
+internal sealed interface ParseResult {
     data class Frame(val frame: ParsedFrame, val consumed: Int) : ParseResult
     data object NeedMore : ParseResult          // 半包
     data object BadFrame : ParseResult           // 坏帧
 }
 
-data class ParsedFrame(
+internal data class ParsedFrame(
     val frameType: LcFrameType,
     val seq: Int,
     val payload: ByteArray

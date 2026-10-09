@@ -1,7 +1,7 @@
 package com.lzb.lc
 
 data class LcConfig(
-    val maxPayloadBytes: Int = 1 * 1024 * 1024,   // 默认 1MB,接入方按业务改
+    val maxPayloadBytes: Long = 1 * 1024 * 1024,   // 默认 1MB,接入方按业务改
     val heartbeatIntervalMs: Long = 15_000,      // 默认 15秒
     val heartbeatTimeoutMs: Long = 45_000,      // 默认 45秒
     val connectTimeoutMs: Long = 10_000,        // 默认 10秒
