@@ -15,7 +15,10 @@ import java.net.SocketTimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal class TcpTransport(
-    private val socketFactory: () -> Socket = { Socket() },
+    // 返回一个「已连接」的 socket；默认是普通 TCP。注入 TLS 工厂即可支持加密——
+    // 单向/双向(mTLS)/证书固定/主机名校验全在工厂内决定，TcpTransport 不感知（TLS 握手也在工厂内完成）。
+    private val socketFactory: (host: String, port: Int, connectTimeoutMs: Int) -> Socket =
+        { h, p, t -> Socket().apply { connect(InetSocketAddress(h, p), t) } },
     private val config: LcConfig,
     private val listener: TransportListener
 
@@ -40,29 +43,20 @@ internal class TcpTransport(
 
     @Synchronized
     fun connect(host: String, port: Int) {
-        // 丢弃可能残留的上一条连接：关闭其 socket 并清字段。静默处理——这是发起新连接而非断开，
-        // 故不回调 onDisconnected；也不 join（connect 持有本类锁，持锁 join 会与读线程死锁）。
-        // 前提：仅在上一条连接已断开后重连；不要对仍存活的连接直接 connect（否则旧读线程的回调
-        // 会与新连接共享的 disconnected 标志竞争，应先 close()）。
+        val s: Socket
         try {
-            socket?.close()
+            // 工厂返回「已连接」的 socket；TCP 连接 + TLS 握手(若有) + 连接超时都由工厂内部负责
+            s = socketFactory(host, port, config.connectTimeoutMs.toInt())
         } catch (e: Exception) {
-            Log.e(TAG, "connect: close prev e", e)
+            Log.e(TAG, "connect: e", e)
+            notifyDisconnected(e)
+            return
         }
-        socket = null
-        output = null
-        readThread = null
-
-        nextSeq = 0   // 新连接会话，发送序号从头开始
-        disconnected.set(false)
-        val s = socketFactory()
         try {
             s.tcpNoDelay = true
             s.keepAlive = true
-            // 读侧空闲超时(SO_TIMEOUT)应与心跳层一起启用，否则空闲但健康的连接会被误断，暂不设置。
-             s.soTimeout = config.heartbeatIntervalMs.toInt()
-            val address = InetSocketAddress(host, port)
-            s.connect(address, config.connectTimeoutMs.toInt())
+            // TLS 握手(若有)已在工厂内完成，这里的 SO_TIMEOUT 只作用于稳态读，用作心跳 tick
+            s.soTimeout = config.heartbeatIntervalMs.toInt()
             socket = s
             output = s.getOutputStream()
             val stream = s.getInputStream()
