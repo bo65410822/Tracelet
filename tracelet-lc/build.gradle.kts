@@ -41,5 +41,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(project(":lc-protocol"))
+    implementation(files("${rootProject.projectDir}/libs/lc-protocol.jar"))
+
 }
