@@ -1,6 +1,6 @@
 package com.lzb.lc.frame
 
-internal class FrameDecoder(private val maxPayloadBytes: Int) {
+class FrameDecoder(private val maxPayloadBytes: Int) {
 
     private var writePos: Int = 0
     private var buffer: ByteArray = ByteArray(0)
@@ -116,7 +116,7 @@ internal class FrameDecoder(private val maxPayloadBytes: Int) {
                 ((b[p + 2].toInt() and 0xFF) shl 8) or (b[p + 3].toInt() and 0xFF)
 }
 
-internal sealed interface DecodeOutcome {
+sealed interface DecodeOutcome {
     data class Frames(val frames: List<ParsedFrame>) : DecodeOutcome
     data class Corrupt(val frames: List<ParsedFrame>) : DecodeOutcome
 }

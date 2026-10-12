@@ -2,7 +2,7 @@ package com.lzb.lc.frame
 
 import java.util.zip.CRC32
 
-internal object FrameProtocol {
+object FrameProtocol {
     const val MAGIC: Int = 0xA55A
     const val VERSION: Byte = 1
     const val HEADER_SIZE: Int = 13   // magic2+ver1+type1+flags1+seq4+length4
@@ -15,13 +15,13 @@ internal object FrameProtocol {
     }
 }
 
-internal sealed interface ParseResult {
+sealed interface ParseResult {
     data class Frame(val frame: ParsedFrame, val consumed: Int) : ParseResult
     data object NeedMore : ParseResult          // 半包
     data object BadFrame : ParseResult           // 坏帧
 }
 
-internal data class ParsedFrame(
+data class ParsedFrame(
     val frameType: LcFrameType,
     val seq: Int,
     val payload: ByteArray

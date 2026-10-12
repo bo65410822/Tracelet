@@ -5,7 +5,7 @@ package com.lzb.lc.frame
  * | magic | version | type | flags | seq  | length | payload   | crc32 |
  * |  2B   |   1B    | 1B   |  1B   |  4B  |  4B    | length B  |  4B   |
  */
-internal class FrameEncoder {
+class FrameEncoder {
 
     fun encode(frameType: LcFrameType, seq: Int, payload: ByteArray): ByteArray {
         // 按协议格式拼接字节数组
